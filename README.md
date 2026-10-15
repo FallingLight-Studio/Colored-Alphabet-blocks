@@ -3,7 +3,7 @@
 A Minecraft mod that adds beautiful, fully dyeable A-Z alphabet blocks to the game! decorating building or creating word-guessing games.
 offical fork from [Thai Alphabet blocks](https://github.com/AitShiroKu/Thai-alphabet-block)
 
-[![Minecraft Versions](https://img.shields.io/badge/Minecraft-1.21.11-blue.svg)](#)
+[![Minecraft Versions](https://img.shields.io/badge/Minecraft-26.3-blue.svg)](#)
 [![Fabric](https://img.shields.io/badge/Fabric-Supported-brightgreen.svg)](#)
 [![Forge](https://img.shields.io/badge/Forge-Supported-green.svg)](#)
 [![NeoForge](https://img.shields.io/badge/NeoForge-Supported-green.svg)](#)
@@ -19,7 +19,7 @@ offical fork from [Thai Alphabet blocks](https://github.com/AitShiroKu/Thai-alph
   - **Glyph/Letter Customization**: Sneak + Right-click a block with any dye to customize the letter color independently!
 - **High-Quality Cutout Rendering**: Crafted using transparent cutout layers, ensuring sharp letter edges, crisp visibility, and integration with the surrounding wood texture.
 - **Dedicated Creative Tab**: Comes with an organized custom Creative Tab containing all the letters in alphabetical order for quick access.
-- **Multi-Loader Support**: Runs natively on **Fabric**, **Forge**, and **NeoForge** for Minecraft `1.21.11`.
+- **Multi-Loader Support**: Runs natively on **Fabric**, **Forge**, and **NeoForge** for Minecraft `26.3`.
   
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/527e8d76-53af-4273-9d52-0a9131026431" />
 

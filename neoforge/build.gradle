@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
     id 'idea'
     id 'maven-publish'
-    id 'net.neoforged.moddev' version '2.0.141'
+    id 'net.neoforged.moddev' version '2.0.148'
 }
 
 version = mod_version
@@ -12,8 +12,8 @@ base {
     archivesName = mod_id + "-neoforge"
 }
 
-// Mojang ships Java 21 to end users in 1.21+, so your mod should target Java 21.
-java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+// Mojang ships Java 25 to end users in 26.2+, so your mod should target Java 25.
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 
 neoForge {
     // Specify the version of NeoForge to use.
@@ -63,16 +63,11 @@ sourceSets.main.resources {
     srcDir rootProject.project(':common').file('src/main/resources')
 }
 
-// Merge common sources directly so NeoForge ModDev sees one sourceSet with all
-// mod classes, avoiding NoClassDefFoundError for common classes at runtime.
-sourceSets.main.java {
-    srcDirs += project(':common').sourceSets.main.java.srcDirs
-}
-
 repositories {
 }
 
 dependencies {
+    implementation project(':common')
 }
 
 tasks.named('processResources', ProcessResources).configure {
