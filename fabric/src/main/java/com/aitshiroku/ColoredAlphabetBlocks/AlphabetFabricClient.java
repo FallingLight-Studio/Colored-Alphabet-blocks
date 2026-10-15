@@ -1,20 +1,65 @@
 package com.aitshiroku.ColoredAlphabetBlocks;
 
+import java.util.List;
+
+import com.mojang.serialization.MapCodec;
+
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.BlockColorRegistry;
+import net.minecraft.client.color.block.BlockTintSource;
+import net.minecraft.client.color.item.ItemTintSource;
+import net.minecraft.client.color.item.ItemTintSources;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.fabricmc.fabric.api.client.rendering.v1.BlockRenderLayerMap;
-import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
-import net.minecraft.client.color.item.ItemTintSources;
-import net.minecraft.client.color.item.ItemTintSource;
-import com.mojang.serialization.MapCodec;
-import net.minecraft.resources.Identifier;
 
 public final class AlphabetFabricClient implements ClientModInitializer {
+
+    private static final BlockTintSource BACKGROUND_TINT_SOURCE = new BlockTintSource() {
+        @Override
+        public int colorInWorld(BlockState state, BlockAndTintGetter level, BlockPos pos) {
+            AlphabetColorProperties.BlockColor color = state.hasProperty(LetterBlock.COLOR)
+                    ? state.getValue(LetterBlock.COLOR)
+                    : AlphabetColorProperties.BlockColor.NONE;
+            return AlphabetColorUtil.backgroundArgbFromColor(color);
+        }
+
+        @Override
+        public int color(BlockState state) {
+            AlphabetColorProperties.BlockColor color = state.hasProperty(LetterBlock.COLOR)
+                    ? state.getValue(LetterBlock.COLOR)
+                    : AlphabetColorProperties.BlockColor.NONE;
+            return AlphabetColorUtil.backgroundArgbFromColor(color);
+        }
+    };
+
+    private static final BlockTintSource GLYPH_TINT_SOURCE = new BlockTintSource() {
+        @Override
+        public int colorInWorld(BlockState state, BlockAndTintGetter level, BlockPos pos) {
+            DyeColor glyphDye = state.hasProperty(LetterBlock.GLYPH_COLOR)
+                    ? state.getValue(LetterBlock.GLYPH_COLOR)
+                    : DyeColor.BLACK;
+            return AlphabetColorUtil.glyphArgbFromDye(glyphDye);
+        }
+
+        @Override
+        public int color(BlockState state) {
+            DyeColor glyphDye = state.hasProperty(LetterBlock.GLYPH_COLOR)
+                    ? state.getValue(LetterBlock.GLYPH_COLOR)
+                    : DyeColor.BLACK;
+            return AlphabetColorUtil.glyphArgbFromDye(glyphDye);
+        }
+    };
+
+    private static final List<BlockTintSource> ALPHABET_BLOCK_TINT_SOURCES = List.of(
+        BACKGROUND_TINT_SOURCE,
+        GLYPH_TINT_SOURCE
+    );
 
     @Override
     public void onInitializeClient() {
@@ -69,27 +114,7 @@ public final class AlphabetFabricClient implements ClientModInitializer {
             if (!(block instanceof LetterBlock)) {
                 continue;
             }
-            BlockRenderLayerMap.putBlock(block, ChunkSectionLayer.CUTOUT);
-            ColorProviderRegistry.BLOCK.register(
-                    (state, world, pos, tintIndex) -> {
-                        if (tintIndex != 0 && tintIndex != 1) {
-                            return -1;
-                        }
-                        if (tintIndex == 0) {
-                            // Background color
-                            AlphabetColorProperties.BlockColor color = state.hasProperty(LetterBlock.COLOR)
-                                    ? state.getValue(LetterBlock.COLOR)
-                                    : AlphabetColorProperties.BlockColor.NONE;
-                            return AlphabetColorUtil.backgroundArgbFromColor(color);
-                        } else {
-                            // Glyph color
-                            DyeColor glyphDye = state.hasProperty(LetterBlock.GLYPH_COLOR)
-                                    ? state.getValue(LetterBlock.GLYPH_COLOR)
-                                    : DyeColor.BLACK;
-                            return AlphabetColorUtil.glyphArgbFromDye(glyphDye);
-                        }
-                    },
-                    block);
+            BlockColorRegistry.register(ALPHABET_BLOCK_TINT_SOURCES, block);
         }
     }
 }

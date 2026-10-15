@@ -1,40 +1,73 @@
 package com.aitshiroku.ColoredAlphabetBlocks;
 
+import java.util.List;
+
+import com.mojang.serialization.MapCodec;
+
+import net.minecraft.client.color.block.BlockTintSource;
+import net.minecraft.client.color.item.ItemTintSource;
+import net.minecraft.client.color.item.ItemTintSources;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterColorHandlersEvent;
-import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.RegistryObject;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraft.resources.Identifier;
-import com.mojang.serialization.MapCodec;
 
-@Mod.EventBusSubscriber(modid = AlphabetCommon.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
 public final class AlphabetForgeClient {
 
     private AlphabetForgeClient() {
     }
 
-    @SubscribeEvent
-    public static void onClientSetup(FMLClientSetupEvent event) {
-        event.enqueueWork(() -> {
-            for (net.minecraftforge.registries.RegistryObject<Block> ro : AlphabetBlock.BLOCKS.getEntries()) {
-                net.minecraft.client.renderer.ItemBlockRenderTypes.setRenderLayer(ro.get(),
-                        net.minecraft.client.renderer.chunk.ChunkSectionLayer.CUTOUT);
-            }
-        });
-    }
+    private static final BlockTintSource BACKGROUND_TINT_SOURCE = new BlockTintSource() {
+        @Override
+        public int colorInWorld(BlockState state, BlockAndTintGetter level, BlockPos pos) {
+            AlphabetColorProperties.BlockColor color = state.hasProperty(LetterBlock.COLOR)
+                    ? state.getValue(LetterBlock.COLOR)
+                    : AlphabetColorProperties.BlockColor.NONE;
+            return AlphabetColorUtil.backgroundArgbFromColor(color);
+        }
 
-    private static void registerItemTintSources() {
-        // Register custom item tint sources synchronously before model baking
-        net.minecraft.client.color.item.ItemTintSources.ID_MAPPER.put(
+        @Override
+        public int color(BlockState state) {
+            AlphabetColorProperties.BlockColor color = state.hasProperty(LetterBlock.COLOR)
+                    ? state.getValue(LetterBlock.COLOR)
+                    : AlphabetColorProperties.BlockColor.NONE;
+            return AlphabetColorUtil.backgroundArgbFromColor(color);
+        }
+    };
+
+    private static final BlockTintSource GLYPH_TINT_SOURCE = new BlockTintSource() {
+        @Override
+        public int colorInWorld(BlockState state, BlockAndTintGetter level, BlockPos pos) {
+            DyeColor glyphDye = state.hasProperty(LetterBlock.GLYPH_COLOR)
+                    ? state.getValue(LetterBlock.GLYPH_COLOR)
+                    : DyeColor.BLACK;
+            return AlphabetColorUtil.glyphArgbFromDye(glyphDye);
+        }
+
+        @Override
+        public int color(BlockState state) {
+            DyeColor glyphDye = state.hasProperty(LetterBlock.GLYPH_COLOR)
+                    ? state.getValue(LetterBlock.GLYPH_COLOR)
+                    : DyeColor.BLACK;
+            return AlphabetColorUtil.glyphArgbFromDye(glyphDye);
+        }
+    };
+
+    private static final List<BlockTintSource> ALPHABET_BLOCK_TINT_SOURCES = List.of(
+        BACKGROUND_TINT_SOURCE,
+        GLYPH_TINT_SOURCE
+    );
+
+    public static void registerItemTintSources() {
+        ItemTintSources.ID_MAPPER.put(
                 Identifier.fromNamespaceAndPath(AlphabetCommon.MOD_ID, "background_tint"),
-                MapCodec.unit(new net.minecraft.client.color.item.ItemTintSource() {
+                MapCodec.unit(new ItemTintSource() {
                     @Override
                     public int calculate(ItemStack stack, net.minecraft.client.multiplayer.ClientLevel level,
                             net.minecraft.world.entity.LivingEntity entity) {
@@ -52,14 +85,14 @@ public final class AlphabetForgeClient {
                     }
 
                     @Override
-                    public MapCodec<? extends net.minecraft.client.color.item.ItemTintSource> type() {
+                    public MapCodec<? extends ItemTintSource> type() {
                         return MapCodec.unit(this);
                     }
                 }));
 
-        net.minecraft.client.color.item.ItemTintSources.ID_MAPPER.put(
+        ItemTintSources.ID_MAPPER.put(
                 Identifier.fromNamespaceAndPath(AlphabetCommon.MOD_ID, "glyph_tint"),
-                MapCodec.unit(new net.minecraft.client.color.item.ItemTintSource() {
+                MapCodec.unit(new ItemTintSource() {
                     @Override
                     public int calculate(ItemStack stack, net.minecraft.client.multiplayer.ClientLevel level,
                             net.minecraft.world.entity.LivingEntity entity) {
@@ -75,7 +108,7 @@ public final class AlphabetForgeClient {
                     }
 
                     @Override
-                    public MapCodec<? extends net.minecraft.client.color.item.ItemTintSource> type() {
+                    public MapCodec<? extends ItemTintSource> type() {
                         return MapCodec.unit(this);
                     }
                 }));
@@ -92,26 +125,7 @@ public final class AlphabetForgeClient {
             if (!(block instanceof LetterBlock)) {
                 continue;
             }
-            event.register(
-                    (state, level, pos, tintIndex) -> {
-                        if (tintIndex != 0 && tintIndex != 1) {
-                            return -1;
-                        }
-                        if (tintIndex == 0) {
-                            // Background color
-                            AlphabetColorProperties.BlockColor color = state.hasProperty(LetterBlock.COLOR)
-                                    ? state.getValue(LetterBlock.COLOR)
-                                    : AlphabetColorProperties.BlockColor.NONE;
-                            return AlphabetColorUtil.backgroundArgbFromColor(color);
-                        } else {
-                            // Glyph color
-                            DyeColor glyphDye = state.hasProperty(LetterBlock.GLYPH_COLOR)
-                                    ? state.getValue(LetterBlock.GLYPH_COLOR)
-                                    : DyeColor.BLACK;
-                            return AlphabetColorUtil.glyphArgbFromDye(glyphDye);
-                        }
-                    },
-                    block);
+            event.register(ALPHABET_BLOCK_TINT_SOURCES, block);
         }
     }
 }

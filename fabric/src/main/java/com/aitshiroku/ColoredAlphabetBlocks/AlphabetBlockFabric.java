@@ -8,7 +8,7 @@ import java.util.Map;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
-import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
+import net.fabricmc.fabric.api.creativetab.v1.FabricCreativeModeTab;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -70,7 +70,7 @@ public final class AlphabetBlockFabric implements ModInitializer {
         );
 
         // Register custom creative tab
-        CreativeModeTab alphabetTab = FabricItemGroup.builder()
+        CreativeModeTab alphabetTab = FabricCreativeModeTab.builder()
             .title(Component.translatable("itemGroup." + AlphabetCommon.MOD_ID))
             .icon(() -> {
                 Item firstItem = REGISTERED_ITEMS.get("letter_a");
@@ -118,7 +118,7 @@ public final class AlphabetBlockFabric implements ModInitializer {
                 return InteractionResult.PASS;
             }
 
-            DyeColor newColor = dyeItem.getDyeColor();
+            DyeColor newColor = stack.get(net.minecraft.core.component.DataComponents.DYE);
 
             // Same color already applied — consume the interaction but do nothing
             if (state.getValue(AlphabetColorProperties.GLYPH_COLOR) == newColor) {

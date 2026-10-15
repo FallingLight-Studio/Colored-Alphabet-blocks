@@ -53,7 +53,7 @@ public final class AlphabetGlyphDyeHandler {
         if (!state.hasProperty(AlphabetColorProperties.GLYPH_COLOR))
             return;
 
-        DyeColor newColor = dyeItem.getDyeColor();
+        DyeColor newColor = stack.get(net.minecraft.core.component.DataComponents.DYE);
 
         // Same color already applied — consume the interaction but do nothing
         if (state.getValue(AlphabetColorProperties.GLYPH_COLOR) == newColor) {
